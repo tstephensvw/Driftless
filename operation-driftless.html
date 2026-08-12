@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Operation Driftless — Joy-Con Overhaul Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --slate:#12181F;
+  --slate-2:#1A232D;
+  --panel:#202B37;
+  --slot:#28333F;
+  --edge-dark:#0B1015;
+  --edge-light:#3D4C5B;
+  --gold:#E8A33D;
+  --cyan:#4FD6C8;
+  --redstone:#C9483F;
+  --grass:#77B255;
+  --ink:#E9EEF2;
+  --muted:#8FA0AE;
+  --rule:rgba(143,160,174,.22);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--slate);
+  background-image:
+    radial-gradient(1100px 620px at 50% -12%, rgba(232,163,61,.13), transparent 62%),
+    radial-gradient(800px 500px at 92% 8%, rgba(79,214,200,.07), transparent 60%);
+  color:var(--ink);
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.62;
+  padding-bottom:80px;
+}
+
+.wrap{max-width:940px;margin:0 auto;padding:0 22px}
+
+/* ---------- progress rail ---------- */
+.rail{
+  position:sticky;top:0;z-index:60;
+  background:rgba(18,24,31,.94);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--rule);
+}
+.rail-in{max-width:940px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.rail-label{font-family:"Silkscreen",monospace;font-size:10px;letter-spacing:.1em;color:var(--gold);white-space:nowrap}
+.bar{flex:1;height:12px;background:var(--edge-dark);border-top:2px solid #060A0D;border-left:2px solid #060A0D;border-bottom:2px solid var(--edge-light);border-right:2px solid var(--edge-light)}
+.bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--grass),var(--cyan));transition:width .35s ease}
+.rail-count{font-family:"Silkscreen",monospace;font-size:11px;color:var(--ink);white-space:nowrap}
+
+/* ---------- hero ---------- */
+header{padding:56px 0 40px;text-align:center;position:relative;animation:boot .8s ease both}
+@keyframes boot{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.eyebrow{font-family:"Silkscreen",monospace;font-size:11px;letter-spacing:.24em;color:var(--cyan);margin-bottom:20px}
+h1{
+  font-family:"Bungee",sans-serif;
+  font-size:clamp(2.4rem,9vw,4.4rem);
+  line-height:.94;margin:0 0 8px;
+  color:var(--gold);
+  text-shadow:0 0 34px rgba(232,163,61,.34), 4px 4px 0 var(--edge-dark);
+}
+.sub{font-size:1.06rem;color:var(--muted);max-width:520px;margin:14px auto 0}
+.crew{margin-top:26px;font-family:"Silkscreen",monospace;font-size:11px;letter-spacing:.1em;color:var(--muted)}
+.crew b{color:var(--ink)}
+
+.statline{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:30px}
+.stat{
+  background:var(--slot);
+  border-top:3px solid var(--edge-dark);border-left:3px solid var(--edge-dark);
+  border-bottom:3px solid var(--edge-light);border-right:3px solid var(--edge-light);
+  padding:11px 16px;min-width:112px;
+}
+.stat .n{font-family:"Bungee",sans-serif;font-size:1.5rem;color:var(--cyan);line-height:1}
+.stat .l{font-family:"Silkscreen",monospace;font-size:9px;letter-spacing:.09em;color:var(--muted);margin-top:6px}
+
+/* ---------- sections ---------- */
+section{margin-top:60px}
+.sect-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;border-bottom:2px solid var(--rule);padding-bottom:12px}
+.sect-num{font-family:"Silkscreen",monospace;font-size:11px;color:var(--gold);letter-spacing:.1em}
+h2{font-family:"Bungee",sans-serif;font-size:clamp(1.3rem,4vw,1.85rem);margin:0;color:var(--ink);letter-spacing:.01em}
+.sect-note{color:var(--muted);font-size:.96rem;margin:16px 0 26px}
+
+/* ---------- cards ---------- */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--gold);padding:20px 22px}
+.card.cy{border-left-color:var(--cyan)}
+.card h3{font-family:"Bungee",sans-serif;font-size:.98rem;margin:0 0 10px;color:var(--gold);letter-spacing:.02em}
+.card.cy h3{color:var(--cyan)}
+.card p{margin:0;font-size:.97rem;color:#CBD6DF}
+
+/* ---------- rules ---------- */
+.rules{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.rules li{background:var(--slate-2);border:1px solid var(--rule);padding:14px 18px;font-size:.97rem;display:flex;gap:14px;align-items:flex-start}
+.rules .rn{font-family:"Silkscreen",monospace;font-size:11px;color:var(--gold);flex-shrink:0;padding-top:4px}
+
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px;align-items:center}
+.legend span{font-family:"Silkscreen",monospace;font-size:10px;color:var(--muted)}
+
+/* ---------- tags ---------- */
+.tag{
+  display:inline-block;font-family:"Silkscreen",monospace;font-size:9px;letter-spacing:.09em;
+  padding:5px 9px;border:2px solid;white-space:nowrap;line-height:1;
+}
+.tag.dad{color:var(--gold);border-color:var(--gold);background:rgba(232,163,61,.1)}
+.tag.henry{color:var(--cyan);border-color:var(--cyan);background:rgba(79,214,200,.1)}
+.tag.both{color:var(--grass);border-color:var(--grass);background:rgba(119,178,85,.1)}
+
+/* ---------- inventory ---------- */
+.inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
+.slot{
+  position:relative;background:var(--slot);padding:16px 14px 34px;min-height:150px;
+  border-top:4px solid var(--edge-dark);border-left:4px solid var(--edge-dark);
+  border-bottom:4px solid var(--edge-light);border-right:4px solid var(--edge-light);
+  transition:transform .12s ease, background .12s ease;
+}
+.slot:hover{background:#31404E;transform:translateY(-2px)}
+.slot .glyph{font-size:1.7rem;line-height:1;margin-bottom:10px;display:block}
+.slot .nm{font-weight:700;font-size:.9rem;line-height:1.25;margin-bottom:6px}
+.slot .dsc{font-size:.78rem;color:var(--muted);line-height:1.4}
+.slot .qty{
+  position:absolute;right:9px;bottom:7px;
+  font-family:"Silkscreen",monospace;font-size:15px;color:#fff;
+  text-shadow:2px 2px 0 var(--edge-dark);
+}
+.slot.tool{border-bottom-color:#4A5C4A;border-right-color:#4A5C4A}
+.slot.tool .qty{color:var(--grass)}
+
+/* ---------- video ---------- */
+.vids{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.vid{background:var(--panel);border:1px solid var(--rule);padding:14px}
+.vid h4{font-family:"Bungee",sans-serif;font-size:.85rem;margin:0 0 4px;color:var(--gold)}
+.vid p{font-size:.83rem;color:var(--muted);margin:0 0 12px}
+.frame{position:relative;padding-bottom:56.25%;height:0;background:#000}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+/* ---------- phases ---------- */
+.phase{margin-top:44px}
+.phase-hd{
+  background:linear-gradient(90deg,rgba(232,163,61,.16),transparent);
+  border-left:5px solid var(--gold);padding:16px 20px;margin-bottom:6px;
+}
+.phase-hd .pk{font-family:"Silkscreen",monospace;font-size:10px;color:var(--gold);letter-spacing:.14em}
+.phase-hd h3{font-family:"Bungee",sans-serif;font-size:clamp(1.05rem,3.4vw,1.35rem);margin:6px 0 0;color:var(--ink)}
+.phase-hd p{margin:8px 0 0;font-size:.92rem;color:var(--muted);max-width:640px}
+.phase.p2 .phase-hd{background:linear-gradient(90deg,rgba(79,214,200,.16),transparent);border-left-color:var(--cyan)}
+.phase.p2 .phase-hd .pk{color:var(--cyan)}
+.phase.p3 .phase-hd{background:linear-gradient(90deg,rgba(119,178,85,.16),transparent);border-left-color:var(--grass)}
+.phase.p3 .phase-hd .pk{color:var(--grass)}
+
+.step{
+  display:flex;gap:16px;background:var(--slate-2);border:1px solid var(--rule);
+  padding:16px 18px;margin-top:10px;align-items:flex-start;
+  cursor:pointer;transition:border-color .15s ease,opacity .2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.step:hover{border-color:rgba(232,163,61,.45)}
+.step.done{opacity:.44;border-color:var(--grass)}
+.step.done .s-body{text-decoration:line-through;text-decoration-color:rgba(143,160,174,.5)}
+.box{
+  flex-shrink:0;width:28px;height:28px;background:var(--edge-dark);
+  border-top:3px solid #060A0D;border-left:3px solid #060A0D;
+  border-bottom:3px solid var(--edge-light);border-right:3px solid var(--edge-light);
+  display:flex;align-items:center;justify-content:center;margin-top:2px;
+  font-family:"Silkscreen",monospace;font-size:15px;color:var(--grass);
+}
+.step.done .box{background:var(--grass);color:#0F1519}
+.s-main{flex:1;min-width:0}
+.s-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.s-num{font-family:"Silkscreen",monospace;font-size:11px;color:var(--muted)}
+.s-body{font-size:.98rem}
+.s-body b{color:var(--gold);font-weight:700}
+
+/* ---------- asides ---------- */
+.why,.warn{margin:10px 0 0 44px;padding:13px 17px;font-size:.89rem;line-height:1.55}
+.why{background:rgba(119,178,85,.09);border-left:4px solid var(--grass)}
+.warn{background:rgba(201,72,63,.11);border-left:4px solid var(--redstone)}
+.why b,.warn b{font-family:"Silkscreen",monospace;font-size:9px;letter-spacing:.11em;display:block;margin-bottom:5px}
+.why b{color:var(--grass)}
+.warn b{color:var(--redstone)}
+
+/* ---------- tracker ---------- */
+.track{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.unit{
+  background:var(--slot);padding:16px 14px;text-align:center;cursor:pointer;
+  border-top:4px solid var(--edge-dark);border-left:4px solid var(--edge-dark);
+  border-bottom:4px solid var(--edge-light);border-right:4px solid var(--edge-light);
+  transition:background .15s ease;-webkit-tap-highlight-color:transparent;
+}
+.unit:hover{background:#31404E}
+.unit.done{background:rgba(119,178,85,.2);border-bottom-color:var(--grass);border-right-color:var(--grass)}
+.unit .u-n{font-family:"Bungee",sans-serif;font-size:1.15rem;color:var(--ink)}
+.unit .u-s{font-family:"Silkscreen",monospace;font-size:9px;color:var(--muted);margin-top:7px;letter-spacing:.08em}
+.unit.done .u-s{color:var(--grass)}
+
+/* ---------- misc ---------- */
+.callout{background:var(--panel);border:2px solid var(--gold);padding:22px 24px;margin-top:26px}
+.callout h4{font-family:"Bungee",sans-serif;font-size:1rem;margin:0 0 10px;color:var(--gold)}
+.callout p{margin:0;font-size:.96rem;color:#CBD6DF}
+.callout p+p{margin-top:10px}
+
+footer{margin-top:70px;padding-top:26px;border-top:2px solid var(--rule);text-align:center}
+footer p{font-family:"Silkscreen",monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;line-height:2}
+
+@media (max-width:720px){
+  body{font-size:16px}
+  .duo,.vids{grid-template-columns:1fr}
+  .why,.warn{margin-left:0}
+  .wrap{padding:0 16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-in">
+    <span class="rail-label">MISSION PROGRESS</span>
+    <div class="bar"><div class="bar-fill" id="fill"></div></div>
+    <span class="rail-count" id="count">0/0</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">◈ SHEIKAH SLATE — FIELD REPAIR LOG ◈</div>
+  <h1>Operation<br>Driftless</h1>
+  <p class="sub">Six broken controllers. One teardown each. Zero drift when we're done.</p>
+  <div class="crew">CREW: <b>DAD</b> — lead engineer &nbsp;·&nbsp; <b>HENRY</b> — fabrication &amp; procedure</div>
+  <div class="statline">
+    <div class="stat"><div class="n">6</div><div class="l">CONTROLLERS</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">PHASES</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">PARTS EACH</div></div>
+    <div class="stat"><div class="n">1</div><div class="l">TEARDOWN</div></div>
+  </div>
+</header>
+
+<section>
+  <div class="sect-head"><span class="sect-num">BRIEF</span><h2>What broke, and why we can beat it</h2></div>
+  <div class="duo" style="margin-top:24px">
+    <div class="card">
+      <h3>⚠ THE PROBLEM</h3>
+      <p>Inside every stick is a little strip of carbon with a metal arm scraping across it. Move the stick, the arm slides, the console reads the position. Scrape it a few hundred thousand times and the carbon wears through. Now the arm reads garbage, and Link walks off a cliff while nobody's touching anything. That's drift.</p>
+    </div>
+    <div class="card cy">
+      <h3>◈ THE FIX</h3>
+      <p>We rip out the scraping part entirely. The new sticks use magnets. A magnet moves near a sensor, the sensor measures the magnetic field, and nothing ever touches anything. No contact means no wear. No wear means no drift — not in a year, not in five.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <h4>The one rule that makes this whole plan work</h4>
+    <p>We open each controller <b>exactly once</b>. Everything comes out, the new parts get built onto the loose circuit board while it's sitting on the table, and then the whole finished assembly drops into its shell and gets closed up for good.</p>
+    <p>The trap we're avoiding: swapping the stick, screwing it shut, then realizing the battery still needs doing. Open once. Close once. Move to the next one.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sect-head"><span class="sect-num">RULES</span><h2>Ground rules before we touch a screw</h2></div>
+  <p class="sect-note">Read these out loud together. Henry, you're in charge of calling out when one of these gets broken — including if Dad breaks it.</p>
+  <ul class="rules">
+    <li><span class="rn">01</span><span><b>Screws live in the tray, never on the table.</b> They roll. They vanish. A magnetic parts tray or an ice cube tray works. One controller's screws per compartment.</span></li>
+    <li><span class="rn">02</span><span><b>Ribbon cables are Dad's job, every time.</b> They're the flat orange strips. They tear if you look at them wrong and they are not cheap to replace.</span></li>
+    <li><span class="rn">03</span><span><b>Snug, then stop.</b> Screws in plastic strip if you crank them. When you feel it stop turning easily, you're done. Cranking harder does nothing good.</span></li>
+    <li><span class="rn">04</span><span><b>Whoever is reading the step says it out loud before we do it.</b> Both of us have to agree we're on the same step before anything moves.</span></li>
+    <li><span class="rn">05</span><span><b>If a part doesn't want to go, stop pushing.</b> Nothing in here needs force. If it's fighting you, it's in wrong or something else is in the way.</span></li>
+    <li><span class="rn">06</span><span><b>Tweezers instead of fingers</b> on anything smaller than a pea. Fingers are too big and they leave grease behind.</span></li>
+  </ul>
+  <div class="legend">
+    <span class="tag dad">DAD</span><span>= Dad does it</span>
+    <span class="tag henry">HENRY</span><span>= Henry does it</span>
+    <span class="tag both">TOGETHER</span><span>= both hands on deck</span>
+  </div>
+</section>
+
+<section>
+  <div class="sect-head"><span class="sect-num">LOADOUT</span><h2>Inventory check</h2></div>
+  <p class="sect-note">Lay everything out and count it before step one. The number in the corner of each slot is how many we need for all six controllers.</p>
+  <div class="inv">
+    <div class="slot"><span class="glyph">🕹️</span><div class="nm">TMR Stick Module</div><div class="dsc">The magnet stick. The actual fix.</div><div class="qty">3<span style="font-size:10px">pr</span></div></div>
+    <div class="slot"><span class="glyph">🔋</span><div class="nm">HAC-006 Battery</div><div class="dsc">Old ones are tired. All get new.</div><div class="qty">6</div></div>
+    <div class="slot"><span class="glyph">🎗️</span><div class="nm">SL / SR Ribbon</div><div class="dsc">Side buttons. Fails second-most.</div><div class="qty">3<span style="font-size:10px">pr</span></div></div>
+    <div class="slot"><span class="glyph">🟩</span><div class="nm">Shell + Buttons</div><div class="dsc">Solid color. Molded through.</div><div class="qty">6</div></div>
+    <div class="slot"><span class="glyph">🛡️</span><div class="nm">Silicone Grip</div><div class="dsc">Goes on last. Drop armor.</div><div class="qty">3<span style="font-size:10px">pr</span></div></div>
+    <div class="slot tool"><span class="glyph">🔺</span><div class="nm">Y00 Tri-Wing Driver</div><div class="dsc">Triangle head. The outer 4 screws.</div><div class="qty">1</div></div>
+    <div class="slot tool"><span class="glyph">✚</span><div class="nm">PH0 Phillips Driver</div><div class="dsc">Plus head. Everything inside.</div><div class="qty">1</div></div>
+    <div class="slot tool"><span class="glyph">🔪</span><div class="nm">Opening Pick</div><div class="dsc">Plastic. Never a metal knife.</div><div class="qty">1</div></div>
+    <div class="slot tool"><span class="glyph">🤏</span><div class="nm">Fine Tweezers</div><div class="dsc">For ribbons and springs.</div><div class="qty">1</div></div>
+    <div class="slot tool"><span class="glyph">🗃️</span><div class="nm">Screw Tray</div><div class="dsc">6 compartments. One per unit.</div><div class="qty">1</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="sect-head"><span class="sect-num">FILM</span><h2>Watch before you build</h2></div>
+  <p class="sect-note">Watch the first one all the way through before touching controller #1. Save the second one for whichever unit gets a new shell first. Pause and replay — that's not cheating, that's the method.</p>
+  <div class="vids">
+    <div class="vid">
+      <h4>▸ TAPE 1 — THE INTERNALS</h4>
+      <p>Stick swap, and the same teardown gets you to the battery and side-button ribbon.</p>
+      <div class="frame"><iframe src="https://www.youtube.com/embed/DVFaZGjEyrs" title="GuliKit Hall stick full install" allowfullscreen loading="lazy"></iframe></div>
+    </div>
+    <div class="vid">
+      <h4>▸ TAPE 2 — THE SHELL</h4>
+      <p>Full shell and button transfer. This is the fiddly one. Go slow through the button section.</p>
+      <div class="frame"><iframe src="https://www.youtube.com/embed/xcF-Mi7lLaU" title="Joy-Con shell replacement teardown and assembly" allowfullscreen loading="lazy"></iframe></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sect-head"><span class="sect-num">BUILD</span><h2>The three phases</h2></div>
+  <p class="sect-note">Tap a step to check it off. Do all six controllers through Phase 1 before anybody starts Phase 2 — you get faster doing the same move six times in a row than jumping around.</p>
+
+  <div class="phase p1">
+    <div class="phase-hd">
+      <div class="pk">PHASE ONE</div>
+      <h3>Strip it to the skeleton</h3>
+      <p>Everything old comes out. Nothing goes back in yet. When this phase ends you should have a bare circuit board on the table and an empty shell.</p>
+    </div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.1</span><span class="tag henry">HENRY</span></div>
+      <div class="s-body">Take out the <b>four triangle screws</b> on the back with the Y00 driver. Straight down, firm pressure, turn slow. Drop them in the tray compartment for this controller.</div>
+    </div></div>
+    <div class="why"><b>WHY THE TRIANGLE</b>Nintendo used a weird screw head on purpose so people wouldn't open these. We have the right driver, so the joke's on them.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.2</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Slide the plastic pick into the seam at the <b>bottom edge</b> — the end away from the shoulder buttons — and work it up the side. Barely any pressure. The panel is clipped, not glued.</div>
+    </div></div>
+    <div class="warn"><b>CAUTION</b>Don't push the pick deep inside. There are parts right under the shell and the pick will happily wreck them.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.3</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Open it like a book, charging rail facing away from you. <b>Disconnect the battery ribbon first, before anything else.</b> Lift the connector straight up.</div>
+    </div></div>
+    <div class="why"><b>WHY FIRST</b>With the battery unplugged the board is dead. Nothing can short out, nothing can power on mid-surgery. This is the same reason you pull a spark plug wire before working on an engine.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.4</span><span class="tag henry">HENRY</span></div>
+      <div class="s-body">Pry the old battery loose. It's held by mild sticky tape — lift one edge, then peel. Set it in the recycling pile, not the parts tray.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.5</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Unclip and pull the <b>old SL/SR ribbon cable</b>. Discard.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.6</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Unscrew the middle frame, then unclip the <b>old stick module</b> and lift it out. Discard — this is the broken part we came for.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">1.7</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Unscrew and lift out the <b>circuit board itself</b>, plus the charging rail attached to it. These two are the only things we keep. Everything still in the old shell gets thrown away.</div>
+    </div></div>
+    <div class="why"><b>THE BIG IDEA</b>The circuit board is the brain — it's the only irreplaceable piece. Every other part is something we can buy new. So we get the brain out into the open and build a fresh controller around it, instead of doing surgery in a cramped shell.</div>
+  </div>
+
+  <div class="phase p2">
+    <div class="phase-hd">
+      <div class="pk">PHASE TWO</div>
+      <h3>Build up the board on the bench</h3>
+      <p>New parts attach to the bare board while it's flat on the table with room to work. Nothing goes near a shell in this phase.</p>
+    </div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">2.1</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Clip the <b>new TMR stick module</b> onto the board and seat its ribbon connector. Press until it clicks fully home.</div>
+    </div></div>
+    <div class="warn"><b>#1 MISTAKE</b>A ribbon connector that's <em>almost</em> seated looks perfect and doesn't work. If a new part is dead later, this is why. Push it in until it stops.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">2.2</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Attach the <b>new SL/SR ribbon cable</b> to the board. Same click test.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">2.3</span><span class="tag both">TOGETHER</span></div>
+      <div class="s-body">Leave the battery unplugged for now. Look over the assembly: board, new stick, new ribbon, charging rail. Nothing loose, nothing dangling. <b>This is a checkpoint — say it out loud when it looks right.</b></div>
+    </div></div>
+  </div>
+
+  <div class="phase p3">
+    <div class="phase-hd">
+      <div class="pk">PHASE THREE</div>
+      <h3>Drop it into its new home</h3>
+      <p>The shell gets built up with fresh buttons, the finished assembly drops in, and it closes for the last time.</p>
+    </div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.1</span><span class="tag henry">HENRY</span></div>
+      <div class="s-body">Lay the new shell open and seat the <b>buttons, springs, D-pad and triggers</b> into their slots. These are all brand new — nothing gets transferred from the old shell.</div>
+    </div></div>
+    <div class="warn"><b>SPRING LOADED</b>The ZL and ZR triggers are on springs. They will launch across the room if you let go wrong. Hold them down while you seat them.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.2</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Lower the finished board assembly into the shell, lining it up over the seated buttons. Reconnect the charging rail.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.3</span><span class="tag dad">DAD</span></div>
+      <div class="s-body">Set the <b>new battery</b> in place and connect its ribbon. This is the last thing to get plugged in, exactly the reverse of the order we took it apart.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.4</span><span class="tag henry">HENRY</span></div>
+      <div class="s-body">Close the shell and drive the <b>four triangle screws</b> back in. Go around the corners rather than one side at a time. Snug, then stop.</div>
+    </div></div>
+    <div class="why"><b>WHY IT MATTERS</b>Overtighten these and the shell squeezes the buttons so they feel stiff or stop clicking. The screws hold the halves together — they aren't supposed to compress anything.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.5</span><span class="tag henry">HENRY</span></div>
+      <div class="s-body">Power on, then run <b>Settings → Controllers and Sensors → Calibrate Control Sticks</b>. New sticks need their center point taught to the console once.</div>
+    </div></div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.6</span><span class="tag both">TOGETHER</span></div>
+      <div class="s-body">Press every single button 10 times. All four face buttons, D-pad, L, R, ZL, ZR, SL, SR, stick click. <b>Then load Zelda</b> and walk in slow circles — that's the real drift test, because it reads tiny movements in every direction.</div>
+    </div></div>
+    <div class="why"><b>WHY ZELDA AND NOT MARIO KART</b>Racing games mostly read left and right, so a stick drifting up or down can hide completely. A game where you walk freely in any direction will expose drift instantly.</div>
+
+    <div class="step"><div class="box">✓</div><div class="s-main">
+      <div class="s-top"><span class="s-num">3.7</span><span class="tag henry">HENRY</span></div>
+      <div class="s-body">Slide the <b>silicone grip</b> over the finished controller. Armor goes on last.</div>
+    </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="sect-head"><span class="sect-num">TRACK</span><h2>Six units, one board each</h2></div>
+  <p class="sect-note">Tap a unit when it's fully finished and tested. Run every controller through Phase 1 first, then all of them through Phase 2, then Phase 3 — assembly line beats one-at-a-time.</p>
+  <div class="track" id="track"></div>
+</section>
+
+<footer>
+  <p>OPERATION DRIFTLESS · FIELD REPAIR LOG</p>
+  <p>ENGINEER: DAD &nbsp;//&nbsp; FABRICATOR: HENRY</p>
+  <p>NO SOLDERING · NO DRIFT · NO DO-OVERS</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var KEY='driftless-progress-v1';
+  var mem={steps:{},units:{}};
+  var state=mem;
+
+  function save(){
+    try{
+      if(window.storage && window.storage.set){
+        window.storage.set(KEY, JSON.stringify(state)).catch(function(){});
+      }
+    }catch(e){}
+  }
+
+  function render(){
+    var steps=document.querySelectorAll('.step');
+    var done=0;
+    steps.forEach(function(el,i){
+      if(state.steps[i]){el.classList.add('done');el.setAttribute('aria-checked','true');done++;}
+      else{el.classList.remove('done');el.setAttribute('aria-checked','false');}
+    });
+    document.querySelectorAll('.unit').forEach(function(el,i){
+      var s=el.querySelector('.u-s');
+      if(state.units[i]){el.classList.add('done');s.textContent='COMPLETE';}
+      else{el.classList.remove('done');s.textContent='NOT STARTED';}
+    });
+    var pct = steps.length ? Math.round(done/steps.length*100) : 0;
+    document.getElementById('fill').style.width=pct+'%';
+    document.getElementById('count').textContent=done+'/'+steps.length;
+  }
+
+  // build tracker
+  var track=document.getElementById('track');
+  var names=['UNIT 01','UNIT 02','UNIT 03','UNIT 04','UNIT 05','UNIT 06'];
+  names.forEach(function(n,i){
+    var d=document.createElement('div');
+    d.className='unit';d.tabIndex=0;d.setAttribute('role','checkbox');
+    d.innerHTML='<div class="u-n">'+n+'</div><div class="u-s">NOT STARTED</div>';
+    function tog(){state.units[i]=!state.units[i];render();save();}
+    d.addEventListener('click',tog);
+    d.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();}});
+    track.appendChild(d);
+  });
+
+  // steps
+  document.querySelectorAll('.step').forEach(function(el,i){
+    el.tabIndex=0;el.setAttribute('role','checkbox');
+    function tog(){state.steps[i]=!state.steps[i];render();save();}
+    el.addEventListener('click',tog);
+    el.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();tog();}});
+  });
+
+  // try restore
+  (function(){
+    try{
+      if(window.storage && window.storage.get){
+        window.storage.get(KEY).then(function(r){
+          if(r && r.value){
+            var p=JSON.parse(r.value);
+            if(p && p.steps){state.steps=p.steps;state.units=p.units||{};render();}
+          }
+        }).catch(function(){});
+      }
+    }catch(e){}
+  })();
+
+  render();
+})();
+</script>
+</body>
+</html>
