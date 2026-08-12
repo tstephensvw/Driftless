@@ -1,0 +1,48 @@
+# Publishes the playbook to GitHub Pages on every push to main.
+# Nothing to install and nothing to build: index.html is self-contained,
+# so this just uploads the repo as-is and hands it to Pages.
+name: Deploy playbook to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Lets you re-run a deploy by hand from the Actions tab.
+  workflow_dispatch:
+
+# Permissions the deploy needs. Read the code, write to Pages,
+# and prove to Pages that this job really is this repo.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If two pushes land close together, let the first finish rather than
+# cancelling it — a half-finished deploy is worse than a slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Pages
+        uses: actions/configure-pages@v5
+
+      - name: Package the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # The whole repo. index.html sits at the root, which is what
+          # Pages serves as the landing page. .git and .github are
+          # excluded automatically.
+          path: .
+
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
